@@ -34,13 +34,13 @@
 #define FEATURE_ACCEL
 
 // GPS module
-// #define FEATURE_GPS
+#define FEATURE_GPS
 
 // radiometrix NTX2
-// #define FEATURE_RADIO
+#define FEATURE_RADIO
 
 // XBee module
-// #define FEATURE_XBEE
+#define FEATURE_XBEE
 
 #endif // SELFTEST_CONFIG_H
 

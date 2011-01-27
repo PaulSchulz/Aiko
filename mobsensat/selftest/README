@@ -1,0 +1,14 @@
+This auduino sketch has been written to excercise the various pieces
+of hardware on the MobSenDat board. As the entire board doesn't need
+to be populated, this software has been written to support the case
+where boards are only partially populated.
+
+The configure the software for your particular board configuration,
+edit the file 'selftest_config.h' and comment out the lines enabling
+the features that you don't have.
+
+By default, all hardware features are enabled, which describes a fully
+populated board.
+
+
+
