@@ -31,16 +31,17 @@
 #define FEATURE_BPS
 
 // 3-axis accelerometer
-#define FEATURE_ACCEL
+// #define FEATURE_ACCEL
 
 // GPS module
 #define FEATURE_GPS
 
 // radiometrix NTX2
 #define FEATURE_RADIO
+//#define ENABLE_RADIO
 
 // XBee module
-#define FEATURE_XBEE
+// #define FEATURE_XBEE
 
 #endif // SELFTEST_CONFIG_H
 

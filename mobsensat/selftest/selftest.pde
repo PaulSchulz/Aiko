@@ -36,7 +36,7 @@
   library - they are not the same!!
 */
 
-#include "selftest_config.h"
+#include "mobsendat_config.h"
 
 #ifdef FEATURE_MICROSD
 #include <SdFat.h>
@@ -61,6 +61,7 @@
 #endif
 
 #ifdef FEATURE_GPS
+#include <TinyGPS.h>
 #endif
 
 #ifdef FEATURE_RADIO
@@ -82,23 +83,18 @@ const int accelChipSelectPin = 10;
 // The other hardware pins used for MISO, MOSI, SCK are fixed.
 
 // -- Global parameters --
+// microsd - see microsd.pde
+
 // rtc
 #ifdef FEATURE_RTC
 RTC_DS1307 RTC;
+DateTime now;
 #endif
 
-// one-wire
+// one-wire temperature
 #ifdef FEATURE_DS18820
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature oneWireSensors(&oneWire);
-#endif
-
-// microsd
-#ifdef FEATURE_MICROSD
-Sd2Card card;
-SdVolume volume;
-SdFile root;
-SdFile file;
 #endif
 
 // bmp085
@@ -113,60 +109,55 @@ float temperature   = 0.0;
 // accel (adxl345)
 #ifdef FEATURE_ACCEL
 byte tmp;
-byte readData; // The byte that data read from Spi interface will be stored in 
-byte fifo[6]; // data read for x,y,z axis from the accelerometer's FIFO buffer
-float x,y,z; // The ranged x,y,z data
-float range; // The range of the x,y,z data returned
+byte readData; // The byte that data read from Spi interface will be
+               // stored in.
+byte fifo[6];  // data read for x,y,z axis from the accelerometer's
+               // FIFO buffer.
+float x,y,z;   // The ranged x,y,z data.
+float range;   // The range of the x,y,z data returned.
 #endif
+
+// gps - see gps.pde
+
+// --- Utility Functions ---
+
+void error(char *str)
+{
+  Serial.print("error: ");
+  Serial.println(str);
+}
+
 
 // --- Setup Functions ---
 
+// serial
 void setup_serial (void) {
   Serial.begin(SERIAL_SPEED);
 }
 
-#ifdef FEATURE_MICROSD
-void setup_sd_card (void) {
-  // initialize the SD card
-  Serial.print("Setup sdcard: ");
+// microsd - see microsd.pde
 
-  if (digitalRead(CARD_DETECT)) {
-    Serial.print("(not inserted) ");
-  } else {
-    Serial.print("(inserted) ");
-  }
-
-  Serial.println("Done");
-}
-#endif
-
+// rtc
 #ifdef FEATURE_RTC
 void setup_rtc (void) {
-  Serial.print("Setup rtc:    ");
-  Serial.println("Done");
 }
 #endif
 
 #ifdef FEATURE_DS18820
 void setup_wire (void) {
-  Serial.print("Setup wire:   ");
   Wire.begin();
   oneWireSensors.begin();
-  Serial.println("Done");
 }
 #endif
 
 #ifdef FEATURE_BPS
 void setup_bmp085 (void) {
-  Serial.print("Setup bmp085: ");
   bmp085_get_cal_data();
-  Serial.println("Done");
 }
 #endif
 
 #ifdef FEATURE_ACCEL
 void setup_accel (void) {
-  Serial.print("Setup accel: ");
 
    Spi.mode((1 << SPE) 
 	    | (1 << MSTR)
@@ -236,14 +227,11 @@ void setup_accel (void) {
   Spi.transfer(1<<7 | 0x38);
   readData = Spi.transfer(0x00); 
   digitalWrite(accelChipSelectPin, HIGH);
-
-  Serial.println("Done");
 }
 #endif
 
-#ifdef FEATURE_GPS
-// TBD
-#endif
+// radio - see radio.pde
+// gps - see gps.pde
 
 #ifdef FEATURE_RADIO
 // TBD
@@ -255,88 +243,34 @@ void setup_accel (void) {
 
 // --- Loop Functions ---
 
-#ifdef FEATURE_MICROSD
-void loop_sd_card (void) {
-  Serial.print("sdcard:  ");
+// microsd - see microsd.pde
 
-  if (digitalRead(CARD_DETECT)) {
-    Serial.print("not inserted");
-  } else {
-    Serial.print("inserted");
-  }
-
-  // // For testing data writes.
-  // if (file.writeError) error("write data");
-  //
-  // // don't sync too often - requires 2048 bytes of I/O to SD card
-  // if ((millis() - syncTime) <  SYNC_INTERVAL) return;
-  // syncTime = millis();
-  // if (!file.sync()) error("sync");
-
-  Serial.println("");
-}
-#endif
-
+// rtc
 #ifdef FEATURE_RTC
 void loop_rtc (void) {
-  Serial.print("rtc:     ");
-
-  DateTime now;
   now = RTC.now();
-
-  Serial.print(now.unixtime());
-  Serial.print(", ");
-  Serial.print('"');
-  Serial.print(now.year(), DEC);
-  Serial.print("/");
-  Serial.print(now.month(), DEC);
-  Serial.print("/");
-  Serial.print(now.day(), DEC);
-  Serial.print(" ");
-  Serial.print(now.hour(), DEC);
-  Serial.print(":");
-  Serial.print(now.minute(), DEC);
-  Serial.print(":");
-  Serial.print(now.second(), DEC);
-  Serial.print('"');
-  Serial.println("");
 }
 #endif
 
 #ifdef FEATURE_DS18820
 void loop_onewire (void) {
-  Serial.print("onewire: ");
-
   oneWireSensors.requestTemperatures();
- 
-  Serial.print(oneWireSensors.getTempCByIndex(0));
-  Serial.println("");
 }
 #endif
 
 #ifdef FEATURE_BPS
 void loop_bmp085 (void) {
-  Serial.print("bmp085:  ");
-
   bmp085_read_temperature_and_pressure(&raw_temperature, &raw_pressure);
   temperature = (((raw_temperature
 		   - (raw_temperature % 10)) / 10) 
 		 + (float)((raw_temperature % 10) / (float)10));
   pressure = (raw_pressure / (float)100);
   voltage = ((float)(analogRead(VOLTAGE_MONITOR) / (float)97) + 0.6);
-
-  Serial.print("temp:");
-  Serial.print(temperature);
-  Serial.print(" pressure:");
-  Serial.print(pressure);
-  Serial.print(" voltage:");
-  Serial.print(voltage);
-  Serial.print("\n");
 }
 #endif
 
 #ifdef FEATURE_ACCEL
-void loop_accel() {
+void loop_accel (void) {
   // All x,y,z data must be read from FIFO in a multiread burst
   digitalWrite(accelChipSelectPin, LOW);
   // Start reading at 0x32 and set "Read" and "Multi" bits
@@ -352,13 +286,7 @@ void loop_accel() {
 }
 #endif
 
-#ifdef FEATURE_GPS
-// TBD
-#endif
-
-#ifdef FEATURE_RADIO
-// TBD
-#endif
+// gps - see gps.pde
 
 #ifdef FEATURE_XBEE
 // TBD
@@ -390,11 +318,11 @@ void setup (void) {
 #endif
 
 #ifdef FEATURE_GPS
-  // TBD
+  setup_gps();
 #endif
 
 #ifdef FEATURE_RADIO
-  // TBD 
+  setup_radio();
 #endif
 
 #ifdef FEATURE_XBEE
@@ -404,8 +332,6 @@ void setup (void) {
 }
 
 void loop (void) {
-  Serial.println("begin loop");
-
 #ifdef FEATURE_MICROSD
   loop_sd_card();
 #endif
@@ -427,18 +353,16 @@ void loop (void) {
 #endif
 
 #ifdef FEATURE_GPS
-  // TBD
+  loop_gps();
 #endif
 
 #ifdef FEATURE_RADIO
-  // TBD
+#ifdef DISABLE_RADIO
+  loop_radio();
+#endif
 #endif
 
 #ifdef FEATURE_XBEE
   // TBD;
 #endif
-
-  Serial.println("end loop");
-
-  delay(1000);
 }
