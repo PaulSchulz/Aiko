@@ -38,7 +38,7 @@
 
 // radiometrix NTX2
 #define FEATURE_RADIO
-//#define ENABLE_RADIO
+#define ENABLE_RADIO
 
 // XBee module
 // #define FEATURE_XBEE

@@ -1,5 +1,3 @@
-int lineno=0;
-
 #define MAXLINES 10
 char * message[MAXLINES];
 int    txline=0;
@@ -14,7 +12,7 @@ void setup_message (void) {
   message[1] = "   |o_o |   Powered by Linux     \n";
   message[2] = "   |:_/ |   Arduino, freetonics  \n";
   message[3] = "  //   ` \\  Free and Open Source \n";
-  message[4] = " (|     | ) Software and a G24   \n";
+  message[4] = " (|     | ) Software and a G80   \n";
   message[5] = "/'\\_   _/`\\ rocket motor.        \n";
   message[6] = "`___)=(___/                      \n";
   message[7] = "";
@@ -47,11 +45,13 @@ void setup_radio (void) {
 }
 
 void loop_radio (void) {
-  if(!txLock) return;
-     
+  if(txLock) return;
+
+  // MobSenDat_txLine("Up\n");
+  
   MobSenDat_txLine(message[txline]);
   txline++;
-  if(message[txline] == 0) {
+  if(txline == 7) {
     txline = 0;
   }
 

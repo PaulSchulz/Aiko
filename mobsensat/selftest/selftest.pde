@@ -357,7 +357,7 @@ void loop (void) {
 #endif
 
 #ifdef FEATURE_RADIO
-#ifdef DISABLE_RADIO
+#ifdef ENABLE_RADIO
   loop_radio();
 #endif
 #endif
